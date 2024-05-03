@@ -50,7 +50,7 @@ async def get_expirations_by_days(group_name: str):
 
     return exp_list
 
-@router.get("/checkexp/")
+@router.post("/checkexp/")
 async def update_expiration(group_name: str):
     items = mongo_item_handler.get_all_items(group_name)
     current_time = int(time.time())

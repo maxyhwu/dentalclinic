@@ -135,44 +135,37 @@ def update_remain_quan(group_name: str, item_name: str, used_quantity: float):
                 mongo_item_handler.set_remain_quan(group_name, item_name, log["create_time"], abs(used_quantity-log["remain_quan"]))
                 break
 
-@router.get("/", response_model=List[MongoItem] | List[dict])
-async def get_all_items(group_name: str, is_logs: bool = False):
-    try:
-        items = mongo_item_handler.get_all_items(group_name)
-        if is_logs: 
-            return items
-        else:
-            return [{k: v for k, v in (dataclasses.asdict(item)).items() if k != 'logs'} for item in items]
-    except Exception as error:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error: {error}",
-        )
-
-@router.get("/{item_name}/", response_model=MongoItem | dict)
+@router.get("/")
 async def get_item(
     group_name: str,
-    item_name: str,
+    item_name: str = None,
     is_logs: bool = False
 ):
     try:
-        item = mongo_item_handler.get_item(group_name, item_name)
-        if item is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Item {item_name} is not exist.",
-            )
-        if is_logs: 
-            return item
+        if item_name is None:
+            items = mongo_item_handler.get_all_items(group_name)
+            if is_logs: 
+                return items
+            else:
+                return [{k: v for k, v in (dataclasses.asdict(item)).items() if k != 'logs'} for item in items]      
         else:
-            return {k: v for k, v in (dataclasses.asdict(item)).items() if k != 'logs'}
+            item = mongo_item_handler.get_item(group_name, item_name)
+            if item is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Item {item_name} is not exist.",
+                )
+            if is_logs: 
+                return item
+            else:
+                return {k: v for k, v in (dataclasses.asdict(item)).items() if k != 'logs'}
     except Exception as error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error: {error}",
         )
 
-@router.get("/logs/{item_name}", response_model=List[Log])
+@router.get("/logs")
 async def get_logs(
     group_name: str,
     item_name: str,
@@ -184,7 +177,8 @@ async def get_logs(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Item {item_name} is not exist.",
             )
-        return {k: v for k, v in (dataclasses.asdict(item)).items() if k == 'logs'}
+        re = {k: v for k, v in (dataclasses.asdict(item)).items() if k == 'logs'}
+        return re["logs"]
     except Exception as error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

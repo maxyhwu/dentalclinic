@@ -88,7 +88,7 @@ async def delete_member(group_name: str, user_name: str):
             detail=f"Error: {error}",
         )
     
-@router.get("/", response_model=List[dict], status_code=status.HTTP_200_OK)
+@router.get("/", response_model=List[MongoUser], status_code=status.HTTP_200_OK)
 async def get_members(group_name: str):
     return mongo_user_handler.get_all_users(group_name)
 
