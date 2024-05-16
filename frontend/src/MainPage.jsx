@@ -1,98 +1,62 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-
-function AddOrder({ onSave, onDelete }) {
-  const [itemType, setItemType] = useState('');
-  const [expiryDate, setExpiryDate] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [note, setNote] = useState('');
-
-  const handleSave = () => {
-    const newItem = {
-      itemType,
-      expiryDate,
-      quantity,
-      note,
-    };
-    onSave(newItem);
-    setItemType('');
-    setExpiryDate('');
-    setQuantity('');
-    setNote('');
-  };
-
-  const handleDelete = () => {
-    onDelete();
-  };
-
-  return (
-    <div className="modal">
-      <div className="modal-content">
-        <span className="close" onClick={handleDelete}>&times;</span>
-        <h1>新增項目</h1>
-        <div>
-          <label>項目名稱：</label>
-          <input
-            type="text"
-            value={expiryDate}
-            onChange={(e) => setExpiryDate(e.target.value)}
-          />
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <button onClick={handleSave}>儲存</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ListItem({ item }) {
-  return (
-    <Link to="/item-detail" style={{ textDecoration: 'none' }}>
-      <div className="list-item">
-        <span>{item.itemType}</span>&nbsp;&nbsp;&nbsp;
-        <span>{item.expiryDate}</span>&nbsp;&nbsp;&nbsp;
-        <span>{item.quantity}</span>
-      </div>
-    </Link>
-  );
-}
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function MainPage() {
-  const [items, setItems] = useState([
-    { id: 1, itemType: '物品種類', expiryDate: '到期日', quantity: '數量' },
-    { id: 2, itemType: '即期物品', expiryDate: '2022.03.28', quantity: '499' },
-  ]);
+  const [items, setItems] = useState([]);
 
-  const [showModal, setShowModal] = useState(false);
+  useEffect(() => {
+    // Fetch items from the /item API
+    const fetchItems = async () => {
+      try {
+        const response = await axios.get('https://dent-backend.onrender.com/item', {
+          params: {
+            group_name: 'test',
+            is_log: false,
+          },
+        });
+        const itemsData = response.data;
 
-  const addItem = (newItem) => {
-    setItems([...items, { id: items.length + 1, ...newItem }]);
-    setShowModal(false);
-  };
+        // For each item, fetch the logs to get the expiration_date
+        const itemsWithExpiration = await Promise.all(
+          itemsData.map(async (item) => {
+            const logsResponse = await axios.get('https://dent-backend.onrender.com/item/logs', {
+              params: {
+                group_name: item.group_name,
+                item_name: item.item_name,
+              },
+            });
+            const logsData = logsResponse.data;
+            const latestLog = logsData.length ? logsData[0] : null;
+            const expirationDate = latestLog ? new Date(latestLog.expiration_date * 1000).toLocaleDateString() : 'N/A';
 
-  const deleteItem = (id) => {
-    setItems(items.filter((item) => item.id !== id));
-  };
+            return {
+              ...item,
+              expirationDate,
+            };
+          })
+        );
+
+        setItems(itemsWithExpiration);
+      } catch (error) {
+        console.error('Error fetching items or logs:', error);
+      }
+    };
+
+    fetchItems();
+  }, []);
 
   return (
     <div>
       <h1>庫存清單</h1>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-        <button onClick={() => setShowModal(true)}>新增項目</button>
-      </div>
       <div className="list-container">
         {items.map((item) => (
-          <Link key={item.id} to="/item-detail" style={{ textDecoration: 'none' }}>
-            <div className="list-item">
-              <span>{item.itemType}</span>&nbsp;&nbsp;&nbsp;
-              <span>{item.expiryDate}</span>&nbsp;&nbsp;&nbsp;
-              <span>{item.quantity}</span>
-            </div>
-          </Link>
+          <div key={item.item_name} className="list-item">
+            <span>{item.item_name}</span>&nbsp;&nbsp;&nbsp;
+            <span>{item.expirationDate}</span>&nbsp;&nbsp;&nbsp;
+            <span>{item.quantity}</span>
+          </div>
         ))}
       </div>
-      {showModal && <AddOrder onSave={addItem} onDelete={() => setShowModal(false)} />}
     </div>
   );
 }
