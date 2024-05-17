@@ -27,15 +27,17 @@
     box-sizing: border-box;
   }
 
-  button {
+  button.login-button {
     width: 100%;
     padding: 10px;
-    background-color: #007bff;
-    color: white;
+    background-color: #007BFF;
     border: none;
     border-radius: 5px;
+    color: white;
+    font-size: 16px;
     cursor: pointer;
-  }
+    transition: background-color 0.3s ease;
+}
 
   button:hover {
     background-color: #0056b3;

@@ -106,7 +106,7 @@ function Login() {
           />
           {passwordError && <div className="error">{passwordError}</div>}
         </div>
-        <button type="submit">Login</button>
+        <button type="submit" className="login-button">Login</button>
         {loginSuccess && <div className="success">{loginSuccess}</div>}
         {loginError && <div className="error">{loginError}</div>}
       </form>
