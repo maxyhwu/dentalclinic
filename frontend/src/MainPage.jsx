@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Navbar from './Navbar'; 
+import Navbar from './Navbar';
 import ItemDetail from './ItemDetail';
+import './mainpage.css';
 
 function MainPage() {
   const [items, setItems] = useState([]);
@@ -83,7 +84,7 @@ function MainPage() {
     setSelectedItem(null);
     fetchItems(); // Reload items
   };
-  
+
   return (
     <div>
       <Navbar />
