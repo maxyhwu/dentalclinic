@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
+import { AuthContext } from './AuthContext';
 
 function Login() {
   const [groupName, setGroupName] = useState('');
@@ -11,8 +12,8 @@ function Login() {
   const [passwordError, setPasswordError] = useState('');
   const [loginSuccess, setLoginSuccess] = useState('');
   const [loginError, setLoginError] = useState('');
-
   const navigate = useNavigate();
+  const { setAuthData } = useContext(AuthContext);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -56,7 +57,8 @@ function Login() {
         } else {
           setLoginSuccess('Login successful. You are a member.');
         }
-        navigate('/', { state: { groupName, userName, isAdmin: data.isAdmin } });
+        setAuthData({ groupName, userName, isAdmin: data.isAdmin });
+        navigate('/'); // Redirect to main page on success
       } else {
         if (response.status === 400) {
           setLoginError('Password is incorrect.');
