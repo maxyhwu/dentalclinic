@@ -1,5 +1,5 @@
-// src/Login.jsx
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
 function Login() {
@@ -12,6 +12,8 @@ function Login() {
   const [loginSuccess, setLoginSuccess] = useState('');
   const [loginError, setLoginError] = useState('');
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -20,7 +22,8 @@ function Login() {
     setUserNameError('');
     setPasswordError('');
     setLoginError('');
-    console.log('Success:', userName);
+    setLoginSuccess('');
+
     // Form validation
     if (!groupName) {
       setGroupNameError('Please enter your group name');
@@ -36,6 +39,7 @@ function Login() {
       setPasswordError('Please enter your password');
       return;
     }
+
     try {
       // Make API request to check if account exists
       const response = await fetch(`https://dent-backend.onrender.com/user/login/?group_name=${groupName}&user_name=${userName}&password=${password}`, {
@@ -44,15 +48,15 @@ function Login() {
           'Content-Type': 'application/json',
         },
       });
-      console.log(response)
+
       if (response.ok) {
         const data = await response.json();
-        console.log(data)
         if (data.isAdmin) {
           setLoginSuccess('Login successful. You are an admin.');
         } else {
           setLoginSuccess('Login successful. You are a member.');
         }
+        navigate('/', { state: { groupName, userName, isAdmin: data.isAdmin } });
       } else {
         if (response.status === 400) {
           setLoginError('Password is incorrect.');
@@ -66,7 +70,6 @@ function Login() {
       console.error('An error occurred:', error);
       setLoginError('An error occurred. Please try again later.');
     }
-    
   };
 
   return (
