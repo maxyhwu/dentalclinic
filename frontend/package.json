@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "homepage": "https://maxyhwu.github.io/dentalclinic/",
+  "homepage": "https://maxyhwu.github.io/dentalclinic/login/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
