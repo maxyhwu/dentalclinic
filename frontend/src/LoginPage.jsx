@@ -58,7 +58,7 @@ function Login() {
           setLoginSuccess('Login successful. You are a member.');
         }
         setAuthData({ group_name: groupName, username: userName, isAdmin: data.isAdmin, hasLogin: true });
-        navigate('/'); // Redirect to main page on success
+        navigate('/home'); // Redirect to main page on success
       } else {
         if (response.status === 400) {
           setLoginError('Password is incorrect.');
