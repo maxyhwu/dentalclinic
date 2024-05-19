@@ -57,7 +57,7 @@ function Login() {
         } else {
           setLoginSuccess('Login successful. You are a member.');
         }
-        setAuthData({ groupName, userName, isAdmin: data.isAdmin });
+        setAuthData({ group_name: groupName, username: userName, isAdmin: data.isAdmin, hasLogin: true });
         navigate('/'); // Redirect to main page on success
       } else {
         if (response.status === 400) {

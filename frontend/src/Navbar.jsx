@@ -1,9 +1,10 @@
 import React from "react";
 import {BrowserRouter as Router,Link,Routes,Route, NavLink } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 
 function Navbar() {
 
-  const username = 'Account';
+  const { authData } = useAuth();
 
   return (
     <nav className="border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
@@ -17,13 +18,15 @@ function Navbar() {
               <NavLink to="/" className={({isActive}) => "block py-2 px-3 md:p-0 " + isActive ? "text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:dark:text-blue-500 dark:bg-blue-600 md:dark:bg-transparent" : "text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"}>Home</NavLink>
             </li>
             <li>|</li>
-            <li>
-              <NavLink to="/login" className={({isActive}) => "block py-2 px-3 md:p-0 " + isActive ? "text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:dark:text-blue-500 dark:bg-blue-600 md:dark:bg-transparent" : "text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"}>Login</NavLink>
-            </li>
-            <li>|</li>
-            <li>
-              <NavLink to="/user" className={({isActive}) => "block py-2 px-3 md:p-0 " + isActive ? "text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:dark:text-blue-500 dark:bg-blue-600 md:dark:bg-transparent" : "text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"}>{username}</NavLink>
-            </li>
+            { authData.hasLogin ?
+              <li>
+                <NavLink to="/user" className={({isActive}) => "block py-2 px-3 md:p-0 " + isActive ? "text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:dark:text-blue-500 dark:bg-blue-600 md:dark:bg-transparent" : "text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"}>{ authData.group_name }</NavLink>
+              </li>
+              :
+              <li>
+                <NavLink to="/login" className={({isActive}) => "block py-2 px-3 md:p-0 " + isActive ? "text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:dark:text-blue-500 dark:bg-blue-600 md:dark:bg-transparent" : "text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"}>Login</NavLink>
+              </li>
+            }
           </ul>
         </div>
       </div>

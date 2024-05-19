@@ -1,7 +1,10 @@
 // AuthContext.js
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 
-export const AuthContext = createContext();
+export const AuthContext = createContext({ group_name: '', username: '', isAdmin: false,hasLogin: false } );
+
+export const useAuth = () => useContext(AuthContext);
+
 
 export const AuthProvider = ({ children }) => {
   const [authData, setAuthData] = useState(null);

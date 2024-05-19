@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Modal from 'react-modal';
 import Navbar from './Navbar';
+import { useAuth } from './AuthContext';
+
 
 function UserPage() {
+  const { authData } = useAuth();
   const [admin, setAdmin] = useState({'group_name': '', 'user_name': '', 'password': ''});
   const user = { 'group_name': 'ADMIN', 'user_name': 'test_admin', 'password': 'test_admin' };
   const [showAdminPassword,setShowAdminPassword] = useState(false);
@@ -13,7 +16,7 @@ function UserPage() {
   const [modalIsOpen,setModalIsOpen] = useState(false);
   const [newNameExisted, setNewNameExisted] = useState(false);
   const [membersFolded, setMembersFolded] = useState(true);
-  const showToggle = user.group_name === 'ADMIN';
+  const showToggle = authData.group_name === 'ADMIN';
   const [status,setStatus] = useState(showToggle);
   const [memberVisibilities,setMemberVisibilities] = useState({});
 
@@ -84,7 +87,7 @@ function UserPage() {
     //      return;
     //    }
     //};
-    fetch(`${api}/user/add_member/?group_name=${user.group_name}&user_name=${newMemberName}&password=${newMemberPassword}`, {
+    fetch(`${api}/user/add_member/?group_name=${authData.group_name}&user_name=${newMemberName}&password=${newMemberPassword}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -108,7 +111,7 @@ function UserPage() {
 
   const handleDeleteMember = (id) => {
     const user = members.find(member => member.id === id);
-    fetch(`${api}/user/?group_name=${user.group_name}&user_name=${user.user_name}`,{
+    fetch(`${api}/user/?group_name=${authData.group_name}&user_name=${authData.user_name}`,{
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -134,6 +137,7 @@ function UserPage() {
   return (
     <>
       <Navbar />
+      {/* TODO: LOGOUT (or in navbar) */}
       { status &&
         <>
           <div className="flex flex-col items-center justify-center min-h-screen bg-white">
@@ -174,12 +178,12 @@ function UserPage() {
       { !status &&
         <>
           <div className="flex flex-col items-center justify-center min-h-screen">
-            <h1 className="text-4xl mb-8 font-semibold">Welcome, {user.group_name}!</h1>
+            <h1 className="text-4xl mb-8 font-semibold">Welcome, {authData.group_name}!</h1>
             <div className="p-6 rounded-lg w-full max-w-4xl">
               <div className="bg-gray-50 p-4 rounded-lg shadow-md mb-6">
                 <h2 className="text-2xl mb-4 font-semibold">Admin</h2>
-                <p className="text-lg">Username: {user.user_name}</p>
-                <p className="text-lg">Password: {showAdminPassword ? user.password : '********'}</p>
+                <p className="text-lg">Username: {authData.user_name}</p>
+                <p className="text-lg">Password: {showAdminPassword ? authData.password : '********'}</p>
                 <div className="flex justify-end mt-2">
                   <button className='bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2' onClick={toggleAdminPasswordVisibility}>
                     {showAdminPassword ? 'Hide Password' : 'Show Password'}
