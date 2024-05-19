@@ -9,7 +9,7 @@ import { AuthProvider } from './AuthContext';
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename={process.env.PUBLIC_URL}>
         <div>
           <Routes>
             <Route path="/home" element={<MainPage />} />
