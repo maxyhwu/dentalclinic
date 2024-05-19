@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/dentalclinic/login/static/css/main.67c9ec69.css",
-    "main.js": "/dentalclinic/login/static/js/main.f079789a.js",
-    "static/js/453.8ab44547.chunk.js": "/dentalclinic/login/static/js/453.8ab44547.chunk.js",
-    "index.html": "/dentalclinic/login/index.html",
-    "main.67c9ec69.css.map": "/dentalclinic/login/static/css/main.67c9ec69.css.map",
-    "main.f079789a.js.map": "/dentalclinic/login/static/js/main.f079789a.js.map",
-    "453.8ab44547.chunk.js.map": "/dentalclinic/login/static/js/453.8ab44547.chunk.js.map"
+    "main.css": "/dentalclinic/static/css/main.67c9ec69.css",
+    "main.js": "/dentalclinic/static/js/main.56e7f7f3.js",
+    "static/js/453.8ab44547.chunk.js": "/dentalclinic/static/js/453.8ab44547.chunk.js",
+    "index.html": "/dentalclinic/index.html",
+    "main.67c9ec69.css.map": "/dentalclinic/static/css/main.67c9ec69.css.map",
+    "main.56e7f7f3.js.map": "/dentalclinic/static/js/main.56e7f7f3.js.map",
+    "453.8ab44547.chunk.js.map": "/dentalclinic/static/js/453.8ab44547.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.67c9ec69.css",
-    "static/js/main.f079789a.js"
+    "static/js/main.56e7f7f3.js"
   ]
 }
