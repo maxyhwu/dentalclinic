@@ -1,7 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
-import { AuthContext } from './AuthContext';
+import { useAuth } from './AuthContext'; 
+import Cookies from 'js-cookie';
 
 function Login() {
   const [groupName, setGroupName] = useState('');
@@ -13,7 +14,8 @@ function Login() {
   const [loginSuccess, setLoginSuccess] = useState('');
   const [loginError, setLoginError] = useState('');
   const navigate = useNavigate();
-  const { setAuthData } = useContext(AuthContext);
+  const { setAuthData } = useAuth();
+  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -52,6 +54,9 @@ function Login() {
 
       if (response.ok) {
         const data = await response.json();
+        const authData = { group_name: groupName, username: userName, isAdmin: data.isAdmin, hasLogin: true };
+        setAuthData(authData);
+        Cookies.set('authData', JSON.stringify(authData), { expires: 1 }); // Expires in 1 day
         if (data.isAdmin) {
           setLoginSuccess('Login successful. You are an admin.');
         } else {

@@ -1,13 +1,19 @@
-// AuthContext.js
 import React, { createContext, useState, useContext } from 'react';
 
-export const AuthContext = createContext({ group_name: '', username: '', isAdmin: false,hasLogin: false } );
+// 创建一个默认的 authData 对象
+const defaultAuthData = {
+  group_name: '',
+  username: '',
+  isAdmin: false,
+  hasLogin: false,
+};
+
+export const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
-
 export const AuthProvider = ({ children }) => {
-  const [authData, setAuthData] = useState(null);
+  const [authData, setAuthData] = useState(defaultAuthData);
 
   return (
     <AuthContext.Provider value={{ authData, setAuthData }}>

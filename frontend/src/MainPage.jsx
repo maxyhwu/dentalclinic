@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
 import ItemDetail from './ItemDetail';
 import './mainpage.css';
+import Cookies from 'js-cookie';
+import { useAuth } from './AuthContext';
 
 function MainPage() {
   const [items, setItems] = useState([]);
@@ -11,6 +13,14 @@ function MainPage() {
   const [showAddItemModal, setShowAddItemModal] = useState(false);
   const [itemName, setItemName] = useState('');
   const [loading, setLoading] = useState(false);
+  const { authData, setAuthData } = useAuth();  // 确保使用 useContext
+
+  useEffect(() => {
+    const authDataCookie = Cookies.get('authData');
+    if (authDataCookie) {
+      setAuthData(JSON.parse(authDataCookie));
+    }
+  }, [setAuthData]);
 
   useEffect(() => {
     // Fetch items from the /item API
