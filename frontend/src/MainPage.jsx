@@ -100,9 +100,9 @@ function MainPage() {
       <Navbar />
       <h1 style={{ display: 'inline-block' }}>庫存清單</h1>
       <button className="add-order-btn" style={{ float: 'right', marginRight: '20px' }} onClick={() => setShowAddItemModal(true)}>項目 +</button>
-      <div className="list-container">
+      <div className="mylist-container">
         {items.map((item) => (
-          <div key={item.item_name} className="list-item" onClick={() => openItemDetailModal(item)}>
+          <div key={item.item_name} className="mylist-item" onClick={() => openItemDetailModal(item)}>
             <span>{item.item_name}</span>&nbsp;&nbsp;&nbsp;
             <span>{item.expiration_date}</span>&nbsp;&nbsp;&nbsp;
             <span>{item.quantity}</span>

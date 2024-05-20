@@ -1,11 +1,11 @@
-.list-container {
+.mylist-container {
   border: 1px solid #ccc;
   border-radius: 5px;
   padding: 10px;
   margin-bottom: 10px;
 }
 
-.list-item {
+.mylist-item {
   width: 100%;
   max-width: 400px; /* 調整框框的最大寬度 */
   margin-bottom: 10px; /* 調整框框與下一個清單項目之間的間距 */
@@ -13,7 +13,6 @@
   padding: 15px; /* 增加框框內的填充 */
   border: 3px solid #0e0d0d;
   border-radius: 5px;
-  cursor: pointer;
 }
 
 .list-item:hover {

@@ -6,6 +6,7 @@ import { useAuth } from './AuthContext';
 
 function UserPage() {
   const { authData } = useAuth();
+  const [authPassword, setAuthPassword] = useState('');
   const [admin, setAdmin] = useState({'group_name': '', 'user_name': '', 'password': ''});
   const user = { 'group_name': 'ADMIN', 'user_name': 'test_admin', 'password': 'test_admin' };
   const [showAdminPassword,setShowAdminPassword] = useState(false);
@@ -62,7 +63,7 @@ function UserPage() {
   };
 
   const getMemberList = () => {
-    fetch(`${api}/user/?group_name=${user.group_name}`, {
+    fetch(`${api}/user/?group_name=${authData.group_name}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -72,6 +73,7 @@ function UserPage() {
       .then(data => {
         const updatedMembers = data.filter(user => !user.is_admin).map((user,index) => ({...user,id: index + 1}));
         setMembers(updatedMembers);
+        setAuthPassword(data.filter(user => user.is_admin)[0].password);
       })
       .catch(error => {
         console.error('Error fetching member list:',error);
@@ -111,7 +113,7 @@ function UserPage() {
 
   const handleDeleteMember = (id) => {
     const user = members.find(member => member.id === id);
-    fetch(`${api}/user/?group_name=${authData.group_name}&user_name=${authData.user_name}`,{
+    fetch(`${api}/user/?group_name=${authData.group_name}&user_name=${authData.username}`,{
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -182,8 +184,8 @@ function UserPage() {
             <div className="p-6 rounded-lg w-full max-w-4xl">
               <div className="bg-gray-50 p-4 rounded-lg shadow-md mb-6">
                 <h2 className="text-2xl mb-4 font-semibold">Admin</h2>
-                <p className="text-lg">Username: {authData.user_name}</p>
-                <p className="text-lg">Password: {showAdminPassword ? authData.password : '********'}</p>
+                <p className="text-lg">Username: {authData.username}</p>
+                <p className="text-lg">Password: {showAdminPassword ? authPassword : '********'}</p>
                 <div className="flex justify-end mt-2">
                   <button className='bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2' onClick={toggleAdminPasswordVisibility}>
                     {showAdminPassword ? 'Hide Password' : 'Show Password'}

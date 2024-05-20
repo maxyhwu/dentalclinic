@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext } from 'react';
 
-// 创建一个默认的 authData 对象
 const defaultAuthData = {
   group_name: '',
   username: '',
@@ -9,7 +8,6 @@ const defaultAuthData = {
 };
 
 export const AuthContext = createContext();
-
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
