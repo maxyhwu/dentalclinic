@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link} from 'react-router-dom';
 import './Login.css';
 import { useAuth } from './AuthContext'; 
 import Cookies from 'js-cookie';
@@ -80,6 +80,12 @@ function Login() {
   };
 
   return (
+    <div>
+    <nav className="border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+      <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+          <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Dental Clinic Consumables System</span>
+      </div>
+    </nav>
     <div className="login-container">
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
@@ -120,6 +126,7 @@ function Login() {
         {loginSuccess && <div className="success">{loginSuccess}</div>}
         {loginError && <div className="error">{loginError}</div>}
       </form>
+    </div>
     </div>
   );
 }
