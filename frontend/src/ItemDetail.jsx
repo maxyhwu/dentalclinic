@@ -133,18 +133,20 @@ function ItemDetail({ groupName, itemName, onClose }) {
             </thead>
             <tbody>
               {logs.map((log, index) => (
-                <React.Fragment key={index}>
-                  <tr>
-                    <td className="border px-4 py-2">{new Date(log.create_time * 1000).toLocaleDateString()}</td>
-                    <td className="border px-4 py-2">{new Date(log.expiration_date * 1000).toLocaleDateString()}</td>
-                    <td className="border px-4 py-2">{log.remain_quan}</td>
-                  </tr>
-                  {log.note !== "" && (
-                    <tr key={`${index}-note`}>
-                      <td className="border px-4 py-2" colSpan="3" style={{ whiteSpace: 'nowrap' }}>備註：{log.note}</td>
+                log.expiration_date !== null && log.remain_quan !== 0 && (
+                  <React.Fragment key={index}>
+                    <tr>
+                      <td className="border px-4 py-2">{new Date(log.create_time * 1000).toLocaleDateString()}</td>
+                      <td className="border px-4 py-2">{new Date(log.expiration_date * 1000).toLocaleDateString()}</td>
+                      <td className="border px-4 py-2">{log.remain_quan}</td>
                     </tr>
-                  )}
-                </React.Fragment>
+                    {log.note !== "" && (
+                      <tr key={`${index}-note`}>
+                        <td className="border px-4 py-2" colSpan="3" style={{ whiteSpace: 'nowrap' }}>備註：{log.note}</td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                )
               ))}
             </tbody>
           </table>
