@@ -2,10 +2,10 @@ import React, { useEffect, useState, useContext } from 'react';
 import Modal from 'react-modal';
 import Navbar from './Navbar';
 import { useAuth } from './AuthContext';
+import Cookies from 'js-cookie';
 
 
 function UserPage() {
-  const { authData } = useAuth();
   const [authPassword, setAuthPassword] = useState('');
   const [admin, setAdmin] = useState({'group_name': '', 'user_name': '', 'password': ''});
   const [showAdminPassword,setShowAdminPassword] = useState(false);
@@ -16,9 +16,18 @@ function UserPage() {
   const [modalIsOpen,setModalIsOpen] = useState(false);
   const [newNameExisted, setNewNameExisted] = useState(false);
   const [membersFolded, setMembersFolded] = useState(true);
-  const showToggle = authData.group_name === 'ADMIN';
-  const [status,setStatus] = useState(showToggle);
+  const [authData,setAuthData] = useState({});
+  const [showToggle,setShowToggle] = useState(false);
+  const [status,setStatus] = useState(false);
   const [memberVisibilities,setMemberVisibilities] = useState({});
+  useEffect(() => {
+    const authDataCookie = Cookies.get('authData');
+    if(authDataCookie) {
+      setAuthData(JSON.parse(authDataCookie));
+      setShowToggle(JSON.parse(authDataCookie).group_name === 'ADMIN')
+      setStatus(JSON.parse(authDataCookie).group_name === 'ADMIN')
+    }
+  },[setAuthData]);
 
   //const api = "http://localhost:27017"
   const api = "https://dent-backend.onrender.com";

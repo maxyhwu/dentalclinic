@@ -34,7 +34,7 @@ function MainPage() {
       setAuthData(parsedAuthData);
       setGroupName(parsedAuthData.group_name); // Extract and set groupName
     }
-  }, [setAuthData]);
+  },[setAuthData,setGroupName]);
 
   useEffect(() => {
     fetchItems();
