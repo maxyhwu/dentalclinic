@@ -14,24 +14,23 @@ function MainPage() {
   const [itemName, setItemName] = useState('');
   const [loading, setLoading] = useState(false);
   const { authData, setAuthData } = useAuth();  // 确保使用 useContext
-
+  const [groupName, setGroupName] = useState("");
   useEffect(() => {
     const authDataCookie = Cookies.get('authData');
     if (authDataCookie) {
+      setGroupName(JSON.parse(authDataCookie)["group_name"])
       setAuthData(JSON.parse(authDataCookie));
+      fetchItems(JSON.parse(authDataCookie)["group_name"]);
     }
-  }, [setAuthData]);
+  },[setAuthData,setGroupName]);
 
-  useEffect(() => {
-    // Fetch items from the /item API
-    fetchItems();
-  }, []);
 
-  const fetchItems = async () => {
+
+  const fetchItems = async (group_name) => {
     try {
       const response = await axios.get('https://dent-backend.onrender.com/item', {
         params: {
-          group_name: 'test',
+          group_name: group_name,
           is_log: false,
         },
       });
@@ -40,7 +39,7 @@ function MainPage() {
         try {
           const logsResponse = await axios.get('https://dent-backend.onrender.com/item/logs', {
             params: {
-              group_name: item.group_name,
+              group_name: group_name,
               item_name: item.item_name,
             },
           });
@@ -64,7 +63,7 @@ function MainPage() {
     try {
       const logsResponse = await axios.get('https://dent-backend.onrender.com/item/logs', {
         params: {
-          group_name: item.group_name,
+          group_name: groupName,
           item_name: item.item_name,
         },
       });
@@ -78,7 +77,7 @@ function MainPage() {
     setLoading(true);
     try {
       // Send a POST request to add the new item
-      const url = `https://dent-backend.onrender.com/item?group_name=test&item_name=${itemName}`;
+      const url = `https://dent-backend.onrender.com/item?group_name=${groupName}&item_name=${itemName}`;
       const response = await axios.post(url);
       console.log(response);
       // Update the items list
