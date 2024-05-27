@@ -133,7 +133,7 @@ function UserPage() {
 
   useEffect(() => {
     getMemberList();
-  });
+  }, []);
 
   return (
     <>
