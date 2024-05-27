@@ -8,7 +8,6 @@ function UserPage() {
   const { authData } = useAuth();
   const [authPassword, setAuthPassword] = useState('');
   const [admin, setAdmin] = useState({'group_name': '', 'user_name': '', 'password': ''});
-  const user = { 'group_name': 'ADMIN', 'user_name': 'test_admin', 'password': 'test_admin' };
   const [showAdminPassword,setShowAdminPassword] = useState(false);
   const [saveNewMember,setSaveNewMember] = useState(false);
   const [newMemberName,setNewMemberName] = useState('');
@@ -113,7 +112,7 @@ function UserPage() {
 
   const handleDeleteMember = (id) => {
     const user = members.find(member => member.id === id);
-    fetch(`${api}/user/?group_name=${authData.group_name}&user_name=${authData.username}`,{
+    fetch(`${api}/user/?group_name=${user.group_name}&user_name=${user.username}`,{
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
