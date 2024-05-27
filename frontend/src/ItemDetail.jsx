@@ -11,6 +11,7 @@ function ItemDetail({ groupName, itemName, onClose }) {
   const [notiQuan, setNotiQuan] = useState('');
   const [notiDays, setNotiDays] = useState('');
   const [loading, setLoading] = useState(false);
+  const [suggestedRestock, setSuggestedRestock] = useState('');
 
   const fetchLogs = useCallback(async () => {
     try {
@@ -34,10 +35,23 @@ function ItemDetail({ groupName, itemName, onClose }) {
     }
   }, [groupName, itemName]);
 
+  const fetchSuggestedRestock = useCallback(async () => {
+    try {
+      const response = await axios.get(`https://dent-backend.onrender.com/item/predict?group_name=${groupName}`);
+      const restockData = response.data.find(item => Object.keys(item)[0] === itemName);
+      if (restockData) {
+        setSuggestedRestock(Object.values(restockData)[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching suggested restock:', error);
+    }
+  }, [groupName, itemName]);
+
   useEffect(() => {
     fetchLogs();
     fetchItemDetails();
-  }, [fetchLogs, fetchItemDetails]);
+    fetchSuggestedRestock();
+  }, [fetchLogs, fetchItemDetails, fetchSuggestedRestock]);
 
   const handleOrderClick = (e, isConsumption = false) => {
     e.stopPropagation();
@@ -98,6 +112,10 @@ function ItemDetail({ groupName, itemName, onClose }) {
             value={notiDays}
             onChange={(e) => setNotiDays(e.target.value)}
           />
+        </div>
+        <div>
+          <label>建議進貨量：</label>
+          <span>{suggestedRestock}</span>
         </div>
         <div style={{ textAlign: 'right' }}>
           <button disabled={loading} onClick={handleSaveNotification}>

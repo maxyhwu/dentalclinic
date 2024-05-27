@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
 import ItemDetail from './ItemDetail';
@@ -7,7 +7,7 @@ import Cookies from 'js-cookie';
 import { useAuth } from './AuthContext';
 
 function MainPage() {
-  const groupName = 'test';
+  const groupName = 'test'; // Ensure this is set as per your needs
   const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -15,6 +15,16 @@ function MainPage() {
   const [itemName, setItemName] = useState('');
   const [loading, setLoading] = useState(false);
   const { authData, setAuthData } = useAuth();
+
+  const callAnAPI = useCallback(async () => {
+    try {
+      const chExpUrl = `https://dent-backend.onrender.com/expiration/checkexp/?group_name=${groupName}`;
+      const chExpResponse = await axios.post(chExpUrl);
+      console.log(chExpResponse.data); // handle the response data as needed
+    } catch (error) {
+      console.error('Error calling the expiration check API:', error);
+    }
+  }, [groupName]);
 
   useEffect(() => {
     const authDataCookie = Cookies.get('authData');
@@ -25,7 +35,8 @@ function MainPage() {
 
   useEffect(() => {
     fetchItems();
-  }, []);
+    callAnAPI();
+  }, [callAnAPI]);
 
   const fetchItems = async () => {
     try {
