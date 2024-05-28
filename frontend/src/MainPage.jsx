@@ -7,7 +7,7 @@ import Cookies from 'js-cookie';
 import { useAuth } from './AuthContext';
 
 function MainPage() {
-  const groupName = 'test'; // Ensure this is set as per your needs
+  const [groupName, setGroupName] = useState(''); // Initialize as empty string or appropriate default
   const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -17,6 +17,7 @@ function MainPage() {
   const { authData, setAuthData } = useAuth();
 
   const callAnAPI = useCallback(async () => {
+    if (!groupName) return; // Avoid calling the API if groupName is not set
     try {
       const chExpUrl = `https://dent-backend.onrender.com/expiration/checkexp/?group_name=${groupName}`;
       const chExpResponse = await axios.post(chExpUrl);
@@ -29,7 +30,9 @@ function MainPage() {
   useEffect(() => {
     const authDataCookie = Cookies.get('authData');
     if (authDataCookie) {
-      setAuthData(JSON.parse(authDataCookie));
+      const parsedAuthData = JSON.parse(authDataCookie);
+      setAuthData(parsedAuthData);
+      setGroupName(parsedAuthData.group_name); // Extract and set groupName
     }
   }, [setAuthData]);
 
@@ -39,6 +42,7 @@ function MainPage() {
   }, [callAnAPI]);
 
   const fetchItems = async () => {
+    if (!groupName) return; // Avoid fetching items if groupName is not set
     try {
       const itemUrl = `https://dent-backend.onrender.com/item?group_name=${groupName}&is_log=false`;
       const itemResponse = await axios.get(itemUrl);
