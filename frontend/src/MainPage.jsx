@@ -71,13 +71,15 @@ function MainPage() {
           const logsUrl = `https://dent-backend.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
           const logsResponse = await axios.get(logsUrl);
 
-          const expirationDates = logsResponse.data.map((log) => new Date(log.expiration_date * 1000));
-          const earliestExpirationDate = new Date(Math.min(...expirationDates));
+          const expirationDates = logsResponse.data
+            .filter(log => log.expiration_date !== null)
+            .map((log) => new Date(log.expiration_date * 1000));
+          const earliestExpirationDate = expirationDates.length > 0 ? new Date(Math.min(...expirationDates)) : null;
 
           return {
             ...itemDetailResponse.data,
-            expiration_date: earliestExpirationDate.toLocaleDateString(),
-            expiration_time: earliestExpirationDate.getTime() / 1000,
+            expiration_date: earliestExpirationDate ? earliestExpirationDate.toLocaleDateString() : 'N/A',
+            expiration_time: earliestExpirationDate ? earliestExpirationDate.getTime() / 1000 : null,
             isLowQuantity: true,
           };
         })
@@ -89,14 +91,19 @@ function MainPage() {
             const logsUrl = `https://dent-backend.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
             const logsResponse = await axios.get(logsUrl);
 
-            const expirationDates = logsResponse.data.map((log) => new Date(log.expiration_date * 1000));
-            const earliestExpirationDate = new Date(Math.min(...expirationDates));
-            item.expiration_date = earliestExpirationDate.toLocaleDateString();
-            item.expiration_time = earliestExpirationDate.getTime() / 1000;
+            const expirationDates = logsResponse.data
+              .filter(log => log.expiration_date !== null)
+              .map((log) => new Date(log.expiration_date * 1000));
+            const earliestExpirationDate = expirationDates.length > 0 ? new Date(Math.min(...expirationDates)) : null;
+
+            item.expiration_date = earliestExpirationDate ? earliestExpirationDate.toLocaleDateString() : 'N/A';
+            item.expiration_time = earliestExpirationDate ? earliestExpirationDate.getTime() / 1000 : null;
             return item;
           } catch (error) {
             console.error('Error fetching item logs:', error);
-            return item; // Return item without expiration date on error
+            item.expiration_date = 'N/A';
+            item.expiration_time = null;
+            return item;
           }
         })
       );
