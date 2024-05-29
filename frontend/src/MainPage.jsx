@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
 import ItemDetail from './ItemDetail';
@@ -7,51 +7,154 @@ import Cookies from 'js-cookie';
 import { useAuth } from './AuthContext';
 
 function MainPage() {
+  const [groupName, setGroupName] = useState(''); // Initialize as empty string or appropriate default
   const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [logs, setLogs] = useState([]);
   const [showAddItemModal, setShowAddItemModal] = useState(false);
   const [itemName, setItemName] = useState('');
   const [loading, setLoading] = useState(false);
-  const { authData, setAuthData } = useAuth();  // 确保使用 useContext
-  const [groupName, setGroupName] = useState("");
+  const { authData, setAuthData } = useAuth();
+
+  const callAnAPI = useCallback(async () => {
+    if (!groupName) return; // Avoid calling the API if groupName is not set
+    try {
+      const chExpUrl = `https://dent-backend.onrender.com/expiration/checkexp/?group_name=${groupName}`;
+      const chExpResponse = await axios.post(chExpUrl);
+      console.log(chExpResponse.data); // handle the response data as needed
+    } catch (error) {
+      console.error('Error calling the expiration check API:', error);
+    }
+  }, [groupName]);
+
   useEffect(() => {
     const authDataCookie = Cookies.get('authData');
     if (authDataCookie) {
-      setGroupName(JSON.parse(authDataCookie)["group_name"])
-      setAuthData(JSON.parse(authDataCookie));
-      fetchItems(JSON.parse(authDataCookie)["group_name"]);
+      const parsedAuthData = JSON.parse(authDataCookie);
+      setAuthData(parsedAuthData);
+      setGroupName(parsedAuthData.group_name); // Extract and set groupName
+// =======
+//   const { authData, setAuthData } = useAuth();  // 确保使用 useContext
+//   const [groupName, setGroupName] = useState("");
+//   useEffect(() => {
+//     const authDataCookie = Cookies.get('authData');
+//     if (authDataCookie) {
+//       setGroupName(JSON.parse(authDataCookie)["group_name"])
+//       setAuthData(JSON.parse(authDataCookie));
+//       fetchItems(JSON.parse(authDataCookie)["group_name"]);
+// >>>>>>> main
     }
   },[setAuthData,setGroupName]);
 
+  useEffect(() => {
+    fetchItems();
+    callAnAPI();
+  }, [callAnAPI]);
 
-
-  const fetchItems = async (group_name) => {
+  const fetchItems = async () => {
+    if (!groupName) return; // Avoid fetching items if groupName is not set
     try {
-      const response = await axios.get('https://dent-backend.onrender.com/item', {
-        params: {
-          group_name: group_name,
-          is_log: false,
-        },
-      });
-      // Fetch logs for each item to get expiration dates
-      const itemsWithExpiration = await Promise.all(response.data.map(async (item) => {
-        try {
-          const logsResponse = await axios.get('https://dent-backend.onrender.com/item/logs', {
-            params: {
-              group_name: group_name,
-              item_name: item.item_name,
-            },
-          });
-          const expirationDates = logsResponse.data.map(log => new Date(log.expiration_date * 1000));
-          const earliestExpirationDate = new Date(Math.min(...expirationDates));
-          item.expiration_date = earliestExpirationDate.toLocaleDateString();
-          return item;
-        } catch (error) {
-          console.error('Error fetching item logs:', error);
+      const itemUrl = `https://dent-backend.onrender.com/item?group_name=${groupName}&is_log=false`;
+      const itemResponse = await axios.get(itemUrl);
+
+      const nearExpirationUrl = `https://dent-backend.onrender.com/expiration/days?group_name=${groupName}`;
+      const nearExpirationResponse = await axios.get(nearExpirationUrl);
+
+      const lowQuantityUrl = `https://dent-backend.onrender.com/expiration/quantity?group_name=${groupName}`;
+      const lowQuantityResponse = await axios.get(lowQuantityUrl);
+
+      const nearExpirationItems = await Promise.all(
+        nearExpirationResponse.data.map(async (item) => {
+          const itemDetailUrl = `https://dent-backend.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}&is_log=false`;
+          const itemDetailResponse = await axios.get(itemDetailUrl);
+
+          return {
+            ...itemDetailResponse.data,
+            expiration_date: new Date(item.expiration_time * 1000).toLocaleDateString(),
+            expiration_time: item.expiration_time,
+            isNearExpiration: true,
+          };
+        })
+      );
+
+      const lowQuantityItems = await Promise.all(
+        lowQuantityResponse.data.map(async (item) => {
+          const itemDetailUrl = `https://dent-backend.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}&is_log=false`;
+          const itemDetailResponse = await axios.get(itemDetailUrl);
+
+          const logsUrl = `https://dent-backend.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
+          const logsResponse = await axios.get(logsUrl);
+
+          const expirationDates = logsResponse.data
+            .filter(log => log.expiration_date !== null)
+            .map((log) => new Date(log.expiration_date * 1000));
+          const earliestExpirationDate = expirationDates.length > 0 ? new Date(Math.min(...expirationDates)) : null;
+
+          return {
+            ...itemDetailResponse.data,
+            expiration_date: earliestExpirationDate ? earliestExpirationDate.toLocaleDateString() : 'N/A',
+            expiration_time: earliestExpirationDate ? earliestExpirationDate.getTime() / 1000 : null,
+            isLowQuantity: true,
+          };
+        })
+      );
+
+      const itemsWithExpiration = await Promise.all(
+        itemResponse.data.map(async (item) => {
+          try {
+            const logsUrl = `https://dent-backend.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
+            const logsResponse = await axios.get(logsUrl);
+
+            const expirationDates = logsResponse.data
+              .filter(log => log.expiration_date !== null)
+              .map((log) => new Date(log.expiration_date * 1000));
+            const earliestExpirationDate = expirationDates.length > 0 ? new Date(Math.min(...expirationDates)) : null;
+
+            item.expiration_date = earliestExpirationDate ? earliestExpirationDate.toLocaleDateString() : 'N/A';
+            item.expiration_time = earliestExpirationDate ? earliestExpirationDate.getTime() / 1000 : null;
+            return item;
+          } catch (error) {
+            console.error('Error fetching item logs:', error);
+            item.expiration_date = 'N/A';
+            item.expiration_time = null;
+            return item;
+          }
+        })
+      );
+
+      const combinedItems = [
+        ...nearExpirationItems,
+        ...lowQuantityItems,
+        ...itemsWithExpiration.filter(
+          (item) =>
+            !nearExpirationItems.find((nei) => nei.item_name === item.item_name) &&
+            !lowQuantityItems.find((lqi) => lqi.item_name === item.item_name)
+        ),
+      ];
+
+      const sortedItems = combinedItems.sort((a, b) => {
+        if (a.isNearExpiration && b.isNearExpiration) {
+          return a.expiration_time - b.expiration_time;
         }
-      }));
-      setItems(itemsWithExpiration);
+        if (a.isLowQuantity && b.isLowQuantity) {
+          return 0;
+        }
+        if (a.isNearExpiration) {
+          return -1;
+        }
+        if (b.isNearExpiration) {
+          return 1;
+        }
+        if (a.isLowQuantity) {
+          return -1;
+        }
+        if (b.isLowQuantity) {
+          return 1;
+        }
+        return a.expiration_time - b.expiration_time;
+      });
+
+      setItems(sortedItems);
     } catch (error) {
       console.error('Error fetching items:', error);
     }
@@ -61,12 +164,8 @@ function MainPage() {
     setSelectedItem(item);
     setShowAddItemModal(false);
     try {
-      const logsResponse = await axios.get('https://dent-backend.onrender.com/item/logs', {
-        params: {
-          group_name: groupName,
-          item_name: item.item_name,
-        },
-      });
+      const logsUrl = `https://dent-backend.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
+      const logsResponse = await axios.get(logsUrl);
       setLogs(logsResponse.data);
     } catch (error) {
       console.error('Error fetching item logs:', error);
@@ -76,11 +175,10 @@ function MainPage() {
   const handleAddItem = async () => {
     setLoading(true);
     try {
-      // Send a POST request to add the new item
-      const url = `https://dent-backend.onrender.com/item?group_name=${groupName}&item_name=${itemName}`;
-      const response = await axios.post(url);
+      const addItemUrl = `https://dent-backend.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(itemName)}`;
+      const response = await axios.post(addItemUrl);
+
       console.log(response);
-      // Update the items list
       fetchItems();
       setShowAddItemModal(false);
     } catch (error) {
@@ -91,7 +189,7 @@ function MainPage() {
 
   const handleCloseItemDetail = () => {
     setSelectedItem(null);
-    fetchItems(); // Reload items
+    fetchItems();
   };
 
   return (
@@ -101,7 +199,14 @@ function MainPage() {
       <button className="add-order-btn" style={{ float: 'right', marginRight: '20px' }} onClick={() => setShowAddItemModal(true)}>項目 +</button>
       <div className="mylist-container">
         {items.map((item) => (
-          <div key={item.item_name} className="mylist-item" onClick={() => openItemDetailModal(item)}>
+          <div
+            key={item.item_name}
+            className="mylist-item"
+            onClick={() => openItemDetailModal(item)}
+            style={{
+              color: item.isNearExpiration ? 'red' : item.isLowQuantity ? 'purple' : 'black',
+            }}
+          >
             <span>{item.item_name}</span>&nbsp;&nbsp;&nbsp;
             <span>{item.expiration_date}</span>&nbsp;&nbsp;&nbsp;
             <span>{item.quantity}</span>
