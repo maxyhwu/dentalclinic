@@ -45,7 +45,7 @@ function Login() {
 
     try {
       // Make API request to check if account exists
-      const response = await fetch(`https://dent-backend.onrender.com/user/login/?group_name=${groupName}&user_name=${userName}&password=${password}`, {
+      const response = await fetch(`https://dent-backend-uafs.onrender.com/user/login/?group_name=${groupName}&user_name=${userName}&password=${password}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
