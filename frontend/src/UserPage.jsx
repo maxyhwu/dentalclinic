@@ -20,14 +20,23 @@ function UserPage() {
   const [showToggle,setShowToggle] = useState(false);
   const [status,setStatus] = useState(false);
   const [memberVisibilities,setMemberVisibilities] = useState({});
+
   useEffect(() => {
     const authDataCookie = Cookies.get('authData');
     if(authDataCookie) {
       setAuthData(JSON.parse(authDataCookie));
-      setShowToggle(JSON.parse(authDataCookie).group_name === 'ADMIN')
-      setStatus(JSON.parse(authDataCookie).group_name === 'ADMIN')
+      setShowToggle(JSON.parse(authDataCookie).group_name === 'ADMIN');
+      setStatus(JSON.parse(authDataCookie).group_name === 'ADMIN');
+      getMemberList();
     }
   },[setAuthData]);
+
+  //useEffect(() => {
+  //  getMemberList();
+  //  console.log("members:", members);
+  //  console.log("member:", members.find(member => member.user_name === authData.username));
+  //  setAuthPassword(members.find(member => member.user_name === authData.username)[0].password);
+  //},[members]);
 
   //const api = "http://localhost:27017"
   const api = "https://dent-backend.onrender.com";
@@ -71,6 +80,7 @@ function UserPage() {
   };
 
   const getMemberList = () => {
+    console.log('authData:',authData);
     fetch(`${api}/user/?group_name=${authData.group_name}`, {
       method: 'GET',
       headers: {
@@ -79,9 +89,8 @@ function UserPage() {
     })
       .then(response => response.json())
       .then(data => {
-        const updatedMembers = data.filter(user => !user.is_admin).map((user,index) => ({...user,id: index + 1}));
+        const updatedMembers = data.map((user,index) => ({...user,id: index}));
         setMembers(updatedMembers);
-        setAuthPassword(data.filter(user => user.is_admin)[0].password);
       })
       .catch(error => {
         console.error('Error fetching member list:',error);
@@ -142,7 +151,11 @@ function UserPage() {
 
   useEffect(() => {
     getMemberList();
-  }, []);
+    console.log("members:", members);
+    console.log("member:", members.find(member => member.user_name === authData.username));
+    setAuthPassword(members.find(member => member.user_name === authData.username).password);
+    console.log("auth: ", authPassword);
+  }, [setMembers]);
 
   return (
     <>
