@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import Navbar from './Navbar';
-import { useAuth } from './AuthContext';
 import Cookies from 'js-cookie';
 
 
@@ -27,9 +26,15 @@ function UserPage() {
       setAuthData(JSON.parse(authDataCookie));
       setShowToggle(JSON.parse(authDataCookie).group_name === 'ADMIN');
       setStatus(JSON.parse(authDataCookie).group_name === 'ADMIN');
+    }
+  },[]);
+
+  useEffect(() => {
+    if(authData.group_name) {
       getMemberList();
     }
-  },[setAuthData]);
+  },[authData]);
+
 
   //useEffect(() => {
   //  getMemberList();
@@ -130,7 +135,7 @@ function UserPage() {
 
   const handleDeleteMember = (id) => {
     const user = members.find(member => member.id === id);
-    fetch(`${api}/user/?group_name=${user.group_name}&user_name=${user.username}`,{
+    fetch(`${api}/user/?group_name=${user.group_name}&user_name=${user.user_name}`,{
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -140,22 +145,24 @@ function UserPage() {
         if(!response.ok) {
           throw new Error('Failed to delete user');
         }
+        return response.json();
       })
-      .then(response => response.json())
+      .then(() => {
+        getMemberList();
+      })
       .catch(error => {
         console.error('Error deleting user:',error);
       });
-
-    getMemberList();
   };
 
   useEffect(() => {
-    getMemberList();
-    console.log("members:", members);
-    console.log("member:", members.find(member => member.user_name === authData.username));
-    setAuthPassword(members.find(member => member.user_name === authData.username).password);
-    console.log("auth: ", authPassword);
-  }, [setMembers]);
+    if(members.length > 0) {
+      const currentUser = members.find(member => member.user_name === authData.username);
+      if(currentUser) {
+        setAuthPassword(currentUser.password);
+      }
+    }
+  },[members,authData]);
 
   return (
     <>
@@ -225,7 +232,7 @@ function UserPage() {
                 </div>
                 {!membersFolded &&
                 <>
-                  {members.map(member => (
+                {members.filter(member => !member.is_admin).map(member => (
                     <div key={member.id} className="mb-4 p-4 bg-white rounded-lg shadow-md">
                       <p className="text-lg">Name: {member.user_name}</p>
                       <p className="text-lg">Password: {memberVisibilities[member.id] ? member.password : '********'}</p>
