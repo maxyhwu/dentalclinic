@@ -7,8 +7,8 @@ import Cookies from 'js-cookie';
 function UserPage() {
   const [authPassword, setAuthPassword] = useState('');
   const [admin, setAdmin] = useState({'group_name': '', 'user_name': '', 'password': ''});
+  const [addAdminText, setAddAdminText] = useState('');
   const [showAdminPassword,setShowAdminPassword] = useState(false);
-  const [saveNewMember,setSaveNewMember] = useState(false);
   const [newMemberName,setNewMemberName] = useState('');
   const [newMemberPassword,setNewMemberPassword] = useState('');
   const [members,setMembers] = useState([]);
@@ -35,16 +35,7 @@ function UserPage() {
     }
   },[authData]);
 
-
-  //useEffect(() => {
-  //  getMemberList();
-  //  console.log("members:", members);
-  //  console.log("member:", members.find(member => member.user_name === authData.username));
-  //  setAuthPassword(members.find(member => member.user_name === authData.username)[0].password);
-  //},[members]);
-
-  //const api = "http://localhost:27017"
-  const api = "https://dent-backend.onrender.com";
+  const api = "https://dent-backend-uafs.onrender.com";
 
   const addAdmin = () => {
     console.log('admin:', admin);
@@ -56,8 +47,11 @@ function UserPage() {
     })
     .then(response => {
       console.log('Status Code:',response.status);
+      setAddAdminText(response.status === 200 ? `Group ${admin.group_name} and Admin ${admin.user_name} added successfully.` : 'Failed to add admin.');
 
-      if(!response.ok) {
+      if (response.ok) {
+        setAdmin({'group_name': '', 'user_name': '', 'password': ''});
+      } else {
         return response.json().then(errorData => {
           console.error('Error message:', errorData.message);
           throw new Error('Failed to add admin');
@@ -71,6 +65,9 @@ function UserPage() {
     .catch(error => {
       console.error('Error adding admin:',error);
     });
+    setTimeout(() => {
+      setAddAdminText('');
+    },5000);
   };
 
   const toggleAdminPasswordVisibility = () => {
@@ -103,14 +100,14 @@ function UserPage() {
   };
 
   const handleSaveNewMember = () => {
-    //if (members.length !== 0) {
-    //    if (members.some(member => member.user_name === newMemberName)) {
-    //      setNewNameExisted(true);
-    //    };
-    //    if (setNewNameExisted) {
-    //      return;
-    //    }
-    //};
+    if (members.length !== 0) {
+      if (members.some(member => member.user_name === newMemberName)) {
+        setNewNameExisted(true);
+        return;
+      } else {
+        setNewNameExisted(false);
+      }
+    }
     fetch(`${api}/user/add_member/?group_name=${authData.group_name}&user_name=${newMemberName}&password=${newMemberPassword}`, {
       method: 'POST',
       headers: {
@@ -196,11 +193,12 @@ function UserPage() {
                 className="w-full p-2 mb-4 border border-gray-300 rounded"
               />
               <button
-                className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded w-full"
+                className="bg-transparent bg-blue-500 hover:bg-blue-700 font-semibold text-white py-2 px-4 border hover:border-blue-500 hover:border-transparent rounded w-full"
                 onClick={addAdmin}
               >
                 Save
               </button>
+              {addAdminText && <p className="text-red-500 mt-4">{addAdminText}</p>}
             </div>
           </div>
         </>
@@ -215,10 +213,10 @@ function UserPage() {
                 <p className="text-lg">Username: {authData.username}</p>
                 <p className="text-lg">Password: {showAdminPassword ? authPassword : '********'}</p>
                 <div className="flex justify-end mt-2">
-                  <button className='bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2' onClick={toggleAdminPasswordVisibility}>
+                  <button className='bg-transparent hover:bg-blue-700 bg-blue-500 font-semibold text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2' onClick={toggleAdminPasswordVisibility}>
                     {showAdminPassword ? 'Hide Password' : 'Show Password'}
                   </button>
-                  <button className='bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2' onClick={() => setModalIsOpen(true)}>
+                  <button className='bg-transparent bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2' onClick={() => setModalIsOpen(true)}>
                     Add Member
                   </button>
                 </div>
@@ -238,7 +236,7 @@ function UserPage() {
                       <p className="text-lg">Password: {memberVisibilities[member.id] ? member.password : '********'}</p>
                       <div className="flex justify-end mt-2">
                         <button
-                          className='bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2'
+                          className='bg-transparent hover:bg-blue-700 bg-blue-500 font-semibold text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2'
                           onClick={() => toggleMemberPasswordVisibility(member.id)}
                         >
                           {memberVisibilities[member.id] ? 'Hide Password' : 'Show Password'}
