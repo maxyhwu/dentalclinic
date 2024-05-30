@@ -162,7 +162,7 @@ function UserPage() {
   },[members,authData]);
 
   return (
-    <>
+    <div className='bg-white'>
       <Navbar />
       { status &&
         <>
@@ -294,7 +294,7 @@ function UserPage() {
       <div>
         {showToggle && <button className="fixed bottom-4 left-4 bg-red-500 text-white font-semibold py-2 px-4 rounded border hover:bg-white hover:text-red-500 hover:border-red-500" onClick={() => setStatus(!status)}>Toggle Status</button>}
       </div>
-    </>
+    </div>
   );
 }
 
