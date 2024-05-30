@@ -15,7 +15,7 @@ function ItemDetail({ groupName, itemName, onClose }) {
 
   const fetchLogs = useCallback(async () => {
     try {
-      const logsUrl = `https://dent-backend.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(itemName)}`;
+      const logsUrl = `https://dent-backend-uafs.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(itemName)}`;
       const response = await axios.get(logsUrl);
       setLogs(response.data);
     } catch (error) {
@@ -25,7 +25,7 @@ function ItemDetail({ groupName, itemName, onClose }) {
 
   const fetchItemDetails = useCallback(async () => {
     try {
-      const itemDetailUrl = `https://dent-backend.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(itemName)}&is_log=false`;
+      const itemDetailUrl = `https://dent-backend-uafs.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(itemName)}&is_log=false`;
       const response = await axios.get(itemDetailUrl);
       const item = response.data;
       setNotiQuan(item.noti_quan || '');
@@ -37,7 +37,7 @@ function ItemDetail({ groupName, itemName, onClose }) {
 
   const fetchSuggestedRestock = useCallback(async () => {
     try {
-      const response = await axios.get(`https://dent-backend.onrender.com/item/predict?group_name=${groupName}`);
+      const response = await axios.get(`https://dent-backend-uafs.onrender.com/item/predict?group_name=${groupName}`);
       const restockData = response.data.find(item => Object.keys(item)[0] === itemName);
       if (restockData) {
         setSuggestedRestock(Object.values(restockData)[0]);
@@ -62,7 +62,7 @@ function ItemDetail({ groupName, itemName, onClose }) {
   const handleSaveOrder = async () => {
     setLoading(true);
     try {
-      let url = `https://dent-backend.onrender.com/item/update?group_name=${groupName}&item_name=${encodeURIComponent(itemName)}&user_name=chuan&quantity=${quantity * (isConsumption ? -1 : 1)}`;
+      let url = `https://dent-backend-uafs.onrender.com/item/update?group_name=${groupName}&item_name=${encodeURIComponent(itemName)}&user_name=chuan&quantity=${quantity * (isConsumption ? -1 : 1)}`;
       if (!isConsumption) {
         url += `&expiration_date=${expirationDate ? new Date(expirationDate).getTime() / 1000 : ''}&note=${note}`;
       }
@@ -82,7 +82,7 @@ function ItemDetail({ groupName, itemName, onClose }) {
 
   const handleSaveNotification = async () => {
     try {
-      const url = `https://dent-backend.onrender.com/item/set?group_name=${groupName}&item_name=${encodeURIComponent(itemName)}&noti_quan=${notiQuan}&noti_days=${notiDays}`;
+      const url = `https://dent-backend-uafs.onrender.com/item/set?group_name=${groupName}&item_name=${encodeURIComponent(itemName)}&noti_quan=${notiQuan}&noti_days=${notiDays}`;
       const response = await axios.post(url);
       console.log(response.data);
     } catch (error) {

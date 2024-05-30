@@ -19,7 +19,7 @@ function MainPage() {
   const callAnAPI = useCallback(async () => {
     if (!groupName) return; // Avoid calling the API if groupName is not set
     try {
-      const chExpUrl = `https://dent-backend.onrender.com/expiration/checkexp/?group_name=${groupName}`;
+      const chExpUrl = `https://dent-backend-uafs.onrender.com/expiration/checkexp/?group_name=${groupName}`;
       const chExpResponse = await axios.post(chExpUrl);
       console.log(chExpResponse.data); // handle the response data as needed
     } catch (error) {
@@ -54,18 +54,18 @@ function MainPage() {
   const fetchItems = async () => {
     if (!groupName) return; // Avoid fetching items if groupName is not set
     try {
-      const itemUrl = `https://dent-backend.onrender.com/item?group_name=${groupName}&is_log=false`;
+      const itemUrl = `https://dent-backend-uafs.onrender.com/item?group_name=${groupName}&is_log=false`;
       const itemResponse = await axios.get(itemUrl);
 
-      const nearExpirationUrl = `https://dent-backend.onrender.com/expiration/days?group_name=${groupName}`;
+      const nearExpirationUrl = `https://dent-backend-uafs.onrender.com/expiration/days?group_name=${groupName}`;
       const nearExpirationResponse = await axios.get(nearExpirationUrl);
 
-      const lowQuantityUrl = `https://dent-backend.onrender.com/expiration/quantity?group_name=${groupName}`;
+      const lowQuantityUrl = `https://dent-backend-uafs.onrender.com/expiration/quantity?group_name=${groupName}`;
       const lowQuantityResponse = await axios.get(lowQuantityUrl);
 
       const nearExpirationItems = await Promise.all(
         nearExpirationResponse.data.map(async (item) => {
-          const itemDetailUrl = `https://dent-backend.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}&is_log=false`;
+          const itemDetailUrl = `https://dent-backend-uafs.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}&is_log=false`;
           const itemDetailResponse = await axios.get(itemDetailUrl);
 
           return {
@@ -79,10 +79,10 @@ function MainPage() {
 
       const lowQuantityItems = await Promise.all(
         lowQuantityResponse.data.map(async (item) => {
-          const itemDetailUrl = `https://dent-backend.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}&is_log=false`;
+          const itemDetailUrl = `https://dent-backend-uafs.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}&is_log=false`;
           const itemDetailResponse = await axios.get(itemDetailUrl);
 
-          const logsUrl = `https://dent-backend.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
+          const logsUrl = `https://dent-backend-uafs.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
           const logsResponse = await axios.get(logsUrl);
 
           const expirationDates = logsResponse.data
@@ -102,7 +102,7 @@ function MainPage() {
       const itemsWithExpiration = await Promise.all(
         itemResponse.data.map(async (item) => {
           try {
-            const logsUrl = `https://dent-backend.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
+            const logsUrl = `https://dent-backend-uafs.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
             const logsResponse = await axios.get(logsUrl);
 
             const expirationDates = logsResponse.data
@@ -164,7 +164,7 @@ function MainPage() {
     setSelectedItem(item);
     setShowAddItemModal(false);
     try {
-      const logsUrl = `https://dent-backend.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
+      const logsUrl = `https://dent-backend-uafs.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
       const logsResponse = await axios.get(logsUrl);
       setLogs(logsResponse.data);
     } catch (error) {
@@ -175,7 +175,7 @@ function MainPage() {
   const handleAddItem = async () => {
     setLoading(true);
     try {
-      const addItemUrl = `https://dent-backend.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(itemName)}`;
+      const addItemUrl = `https://dent-backend-uafs.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(itemName)}`;
       const response = await axios.post(addItemUrl);
 
       console.log(response);
