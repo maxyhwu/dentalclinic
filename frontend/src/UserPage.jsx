@@ -164,7 +164,6 @@ function UserPage() {
   return (
     <>
       <Navbar />
-      {/* TODO: LOGOUT (or in navbar) */}
       { status &&
         <>
           <div className="flex flex-col items-center justify-center min-h-screen bg-white">
@@ -193,7 +192,7 @@ function UserPage() {
                 className="w-full p-2 mb-4 border border-gray-300 rounded"
               />
               <button
-                className="bg-transparent bg-blue-500 hover:bg-blue-700 font-semibold text-white py-2 px-4 border hover:border-blue-500 hover:border-transparent rounded w-full"
+                className="bg-blue-500 hover:bg-blue-700 font-semibold text-white py-2 px-4 border hover:border-blue-500 hover:border-transparent rounded w-full"
                 onClick={addAdmin}
               >
                 Save
@@ -213,10 +212,10 @@ function UserPage() {
                 <p className="text-lg">Username: {authData.username}</p>
                 <p className="text-lg">Password: {showAdminPassword ? authPassword : '********'}</p>
                 <div className="flex justify-end mt-2">
-                  <button className='bg-transparent hover:bg-blue-700 bg-blue-500 font-semibold text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2' onClick={toggleAdminPasswordVisibility}>
+                  <button className='hover:bg-blue-700 bg-blue-500 font-semibold text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2' onClick={toggleAdminPasswordVisibility}>
                     {showAdminPassword ? 'Hide Password' : 'Show Password'}
                   </button>
-                  <button className='bg-transparent bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2' onClick={() => setModalIsOpen(true)}>
+                  <button className='bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2' onClick={() => setModalIsOpen(true)}>
                     Add Member
                   </button>
                 </div>
@@ -236,7 +235,7 @@ function UserPage() {
                       <p className="text-lg">Password: {memberVisibilities[member.id] ? member.password : '********'}</p>
                       <div className="flex justify-end mt-2">
                         <button
-                          className='bg-transparent hover:bg-blue-700 bg-blue-500 font-semibold text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2'
+                          className='hover:bg-blue-700 bg-blue-500 font-semibold text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded ml-2'
                           onClick={() => toggleMemberPasswordVisibility(member.id)}
                         >
                           {memberVisibilities[member.id] ? 'Hide Password' : 'Show Password'}
