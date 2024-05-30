@@ -33,6 +33,16 @@ function MainPage() {
       const parsedAuthData = JSON.parse(authDataCookie);
       setAuthData(parsedAuthData);
       setGroupName(parsedAuthData.group_name); // Extract and set groupName
+// =======
+//   const { authData, setAuthData } = useAuth();  // 确保使用 useContext
+//   const [groupName, setGroupName] = useState("");
+//   useEffect(() => {
+//     const authDataCookie = Cookies.get('authData');
+//     if (authDataCookie) {
+//       setGroupName(JSON.parse(authDataCookie)["group_name"])
+//       setAuthData(JSON.parse(authDataCookie));
+//       fetchItems(JSON.parse(authDataCookie)["group_name"]);
+// >>>>>>> main
     }
   },[setAuthData,setGroupName]);
 
@@ -167,6 +177,7 @@ function MainPage() {
     try {
       const addItemUrl = `https://dent-backend-uafs.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(itemName)}`;
       const response = await axios.post(addItemUrl);
+
       console.log(response);
       fetchItems();
       setShowAddItemModal(false);
