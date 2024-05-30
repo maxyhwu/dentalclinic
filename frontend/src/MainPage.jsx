@@ -2,26 +2,24 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
 import ItemDetail from './ItemDetail';
-import './mainpage.css';
 import Cookies from 'js-cookie';
 import { useAuth } from './AuthContext';
 
 function MainPage() {
-  const [groupName, setGroupName] = useState(''); // Initialize as empty string or appropriate default
+  const [groupName, setGroupName] = useState('');
   const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [logs, setLogs] = useState([]);
   const [showAddItemModal, setShowAddItemModal] = useState(false);
   const [itemName, setItemName] = useState('');
   const [loading, setLoading] = useState(false);
   const { authData, setAuthData } = useAuth();
 
   const callAnAPI = useCallback(async () => {
-    if (!groupName) return; // Avoid calling the API if groupName is not set
+    if (!groupName) return;
     try {
       const chExpUrl = `https://dent-backend-uafs.onrender.com/expiration/checkexp/?group_name=${groupName}`;
       const chExpResponse = await axios.post(chExpUrl);
-      console.log(chExpResponse.data); // handle the response data as needed
+      console.log(chExpResponse.data);
     } catch (error) {
       console.error('Error calling the expiration check API:', error);
     }
@@ -32,19 +30,9 @@ function MainPage() {
     if (authDataCookie) {
       const parsedAuthData = JSON.parse(authDataCookie);
       setAuthData(parsedAuthData);
-      setGroupName(parsedAuthData.group_name); // Extract and set groupName
-// =======
-//   const { authData, setAuthData } = useAuth();  // 确保使用 useContext
-//   const [groupName, setGroupName] = useState("");
-//   useEffect(() => {
-//     const authDataCookie = Cookies.get('authData');
-//     if (authDataCookie) {
-//       setGroupName(JSON.parse(authDataCookie)["group_name"])
-//       setAuthData(JSON.parse(authDataCookie));
-//       fetchItems(JSON.parse(authDataCookie)["group_name"]);
-// >>>>>>> main
+      setGroupName(parsedAuthData.group_name);
     }
-  },[setAuthData,setGroupName]);
+  }, [setAuthData, setGroupName]);
 
   useEffect(() => {
     fetchItems();
@@ -52,22 +40,22 @@ function MainPage() {
   }, [callAnAPI]);
 
   const fetchItems = async () => {
-    if (!groupName) return; // Avoid fetching items if groupName is not set
+    if (!groupName) return;
     try {
       const itemUrl = `https://dent-backend-uafs.onrender.com/item?group_name=${groupName}&is_log=false`;
       const itemResponse = await axios.get(itemUrl);
-
+  
       const nearExpirationUrl = `https://dent-backend-uafs.onrender.com/expiration/days?group_name=${groupName}`;
       const nearExpirationResponse = await axios.get(nearExpirationUrl);
-
+  
       const lowQuantityUrl = `https://dent-backend-uafs.onrender.com/expiration/quantity?group_name=${groupName}`;
       const lowQuantityResponse = await axios.get(lowQuantityUrl);
-
+  
       const nearExpirationItems = await Promise.all(
         nearExpirationResponse.data.map(async (item) => {
           const itemDetailUrl = `https://dent-backend-uafs.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}&is_log=false`;
           const itemDetailResponse = await axios.get(itemDetailUrl);
-
+  
           return {
             ...itemDetailResponse.data,
             expiration_date: new Date(item.expiration_time * 1000).toLocaleDateString(),
@@ -76,20 +64,20 @@ function MainPage() {
           };
         })
       );
-
+  
       const lowQuantityItems = await Promise.all(
         lowQuantityResponse.data.map(async (item) => {
           const itemDetailUrl = `https://dent-backend-uafs.onrender.com/item?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}&is_log=false`;
           const itemDetailResponse = await axios.get(itemDetailUrl);
-
+  
           const logsUrl = `https://dent-backend-uafs.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
           const logsResponse = await axios.get(logsUrl);
-
+  
           const expirationDates = logsResponse.data
-            .filter(log => log.expiration_date !== null)
-            .map((log) => new Date(log.expiration_date * 1000));
+            .filter(log => log.expiration_date !== null && log.remain_quan > 0) // 忽略 remain_quan 等於 0 的記錄
+            .map(log => new Date(log.expiration_date * 1000));
           const earliestExpirationDate = expirationDates.length > 0 ? new Date(Math.min(...expirationDates)) : null;
-
+  
           return {
             ...itemDetailResponse.data,
             expiration_date: earliestExpirationDate ? earliestExpirationDate.toLocaleDateString() : 'N/A',
@@ -98,18 +86,18 @@ function MainPage() {
           };
         })
       );
-
+  
       const itemsWithExpiration = await Promise.all(
         itemResponse.data.map(async (item) => {
           try {
             const logsUrl = `https://dent-backend-uafs.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
             const logsResponse = await axios.get(logsUrl);
-
+  
             const expirationDates = logsResponse.data
-              .filter(log => log.expiration_date !== null)
-              .map((log) => new Date(log.expiration_date * 1000));
+              .filter(log => log.expiration_date !== null && log.remain_quan > 0) // 忽略 remain_quan 等於 0 的記錄
+              .map(log => new Date(log.expiration_date * 1000));
             const earliestExpirationDate = expirationDates.length > 0 ? new Date(Math.min(...expirationDates)) : null;
-
+  
             item.expiration_date = earliestExpirationDate ? earliestExpirationDate.toLocaleDateString() : 'N/A';
             item.expiration_time = earliestExpirationDate ? earliestExpirationDate.getTime() / 1000 : null;
             return item;
@@ -121,7 +109,7 @@ function MainPage() {
           }
         })
       );
-
+  
       const combinedItems = [
         ...nearExpirationItems,
         ...lowQuantityItems,
@@ -131,7 +119,7 @@ function MainPage() {
             !lowQuantityItems.find((lqi) => lqi.item_name === item.item_name)
         ),
       ];
-
+  
       const sortedItems = combinedItems.sort((a, b) => {
         if (a.isNearExpiration && b.isNearExpiration) {
           return a.expiration_time - b.expiration_time;
@@ -153,23 +141,18 @@ function MainPage() {
         }
         return a.expiration_time - b.expiration_time;
       });
-
+  
       setItems(sortedItems);
     } catch (error) {
       console.error('Error fetching items:', error);
     }
   };
+  
+  
 
   const openItemDetailModal = async (item) => {
     setSelectedItem(item);
     setShowAddItemModal(false);
-    try {
-      const logsUrl = `https://dent-backend-uafs.onrender.com/item/logs?group_name=${groupName}&item_name=${encodeURIComponent(item.item_name)}`;
-      const logsResponse = await axios.get(logsUrl);
-      setLogs(logsResponse.data);
-    } catch (error) {
-      console.error('Error fetching item logs:', error);
-    }
   };
 
   const handleAddItem = async () => {
@@ -193,57 +176,73 @@ function MainPage() {
   };
 
   return (
-    <div>
+    <>
       <Navbar />
-      <h1 style={{ display: 'inline-block' }}>庫存清單</h1>
-      <button className="add-order-btn" style={{ float: 'right', marginRight: '20px' }} onClick={() => setShowAddItemModal(true)}>項目 +</button>
-      <div className="mylist-container">
-        {items.map((item) => (
-          <div
-            key={item.item_name}
-            className="mylist-item"
-            onClick={() => openItemDetailModal(item)}
-            style={{
-              color: item.isNearExpiration ? 'red' : item.isLowQuantity ? 'purple' : 'black',
-            }}
-          >
-            <span>{item.item_name}</span>&nbsp;&nbsp;&nbsp;
-            <span>{item.expiration_date}</span>&nbsp;&nbsp;&nbsp;
-            <span>{item.quantity}</span>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+        <h1 className="text-4xl mb-8 font-semibold">庫存清單</h1>
+        <div className="bg-gray-50 p-8 rounded-lg shadow-md border border-gray-300 w-full max-w-4xl">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold">Items</h2>
+            <button className="bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700" onClick={() => setShowAddItemModal(true)}>Add Item</button>
           </div>
-        ))}
+          <div className="grid grid-cols-1 gap-4">
+            {items.map((item) => (
+              <div
+                key={item.item_name}
+                className={`p-4 rounded-lg shadow-md cursor-pointer ${item.isNearExpiration ? 'bg-red-100' : item.isLowQuantity ? 'bg-purple-100' : 'bg-white'}`}
+                onClick={() => openItemDetailModal(item)}
+              >
+                <div className="grid grid-cols-3 items-center">
+                  <span className="text-lg font-semibold">{item.item_name}</span>
+                  <span className="text-center">{item.expiration_date}</span>
+                  <span className="text-right">{item.quantity}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+
       {showAddItemModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <span className="close" onClick={() => setShowAddItemModal(false)}>&times;</span>
-            <h1>新增項目</h1>
-            <div>
-              <label>項目名稱：</label>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+            <div className="flex justify-end">
+              <button
+                className="text-gray-500 hover:text-gray-700"
+                onClick={() => setShowAddItemModal(false)}
+              >
+                Close
+              </button>
+            </div>
+            <h2 className="text-xl font-semibold mb-4">Add Item</h2>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Item Name</label>
               <input
                 type="text"
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded"
               />
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <button disabled={!itemName || loading} onClick={handleAddItem}>
-                {loading ? '處理中...' : '新增'}
-              </button>
-            </div>
+            <button
+              className="bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700"
+              onClick={handleAddItem}
+              disabled={loading}
+            >
+              {loading ? 'Adding...' : 'Add'}
+            </button>
           </div>
         </div>
       )}
+
       {selectedItem && (
         <ItemDetail
-          groupName={selectedItem.group_name}
+          groupName={groupName}
           itemName={selectedItem.item_name}
-          logs={logs}
           onClose={handleCloseItemDetail}
         />
       )}
-      {(showAddItemModal || selectedItem) && <div className="modal-backdrop" onClick={() => setShowAddItemModal(false)}></div>}
-    </div>
+    </>
   );
 }
 
