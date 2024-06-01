@@ -122,11 +122,11 @@ function ItemDetail({ groupName, itemName, onClose }) {
           </div>
           <div className="mb-4">
             <label className="block text-gray-700 mb-2">建議進貨量：</label>
-            <span className="block text-gray-900">{suggestedRestock}</span>
+            <span className="block text-gray-900">{Math.floor(suggestedRestock)}</span>
           </div>
           <div className="text-right mb-4">
             <button className="bg-green-500 text-white font-semibold py-2 px-4 rounded hover:bg-green-700" onClick={handleSaveNotification} disabled={loading}>
-              {loading ? '處理中...' : '儲存通知設置'}
+              {loading ? '處理中...' : '儲存通知設定'}
             </button>
           </div>
           <div className="overflow-x-auto">
